@@ -3349,6 +3349,16 @@ void CBasePlayer::CheckTimeBasedDamage()
 						SetSuitUpdate( "!HEV_HEAL4", false, SUIT_REPEAT_OK );
 					}
 				}
+				else if ((i == itbd_Radiation)) {
+					
+					if (m_rgItems[ITEM_ANTIRAD])
+					{
+						m_rgbTimeBasedDamage[i] = 0;
+						m_rgItems[ITEM_ANTIRAD]--;
+						SetSuitUpdate("!HEV_HEAL5", false, SUIT_REPEAT_OK);
+					}
+
+				}
 
 				// decrement damage duration, detect when done.
 				if( !m_rgbTimeBasedDamage[i] || --m_rgbTimeBasedDamage[i] == 0 )

@@ -23,6 +23,7 @@
 #define ITEM_ANTIDOTE		2
 #define ITEM_SECURITY		3
 #define ITEM_BATTERY		4
+#define ITEM_ANTIRAD		5
 
 #define SF_ITEM_WAIT_FOR_FALL 0x80000000
 

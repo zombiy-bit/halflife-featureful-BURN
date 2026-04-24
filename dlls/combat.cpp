@@ -1993,7 +1993,7 @@ void CBaseEntity::BloodEffect(const DamageInfo &damageInfo, const Vector &vecOri
 {
 	if (!damageInfo.noBlood)
 	{
-		//logman
+		//logmans
 		//UTIL_BloodStream(vecOrigin, gpGlobals->v_forward * -35 + gpGlobals->v_up * 2.1, BloodColor(), (int)100);
 		SpawnBlood( vecOrigin, BloodColor(), damageInfo.damage );// a little surface blood.
 		TraceBleed( damageInfo.damage, vecDir, ptr, damageInfo.type );

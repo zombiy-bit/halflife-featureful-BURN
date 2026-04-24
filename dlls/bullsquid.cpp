@@ -720,15 +720,15 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				const Vector vecSpitDir = SpitAtEnemy(vecSpitOrigin, dirRandomDeviation, &distanceToEnemy);
 
-				bool toxicSpit = false;
-#if FEATURE_BULLSQUID_TOXICSPIT
-				if (GetSkillValue("bullsquid_toxicity") > 0.0f && RANDOM_LONG(0,1))
-				{
-					if (distanceToEnemy < 400) {
-						toxicSpit = true;
-					}
-				}
-#endif
+				bool toxicSpit = true;
+//#if FEATURE_BULLSQUID_TOXICSPIT
+				//if (GetSkillValue("bullsquid_toxicity") > 0.0f && RANDOM_LONG(0,1))
+				//{
+				//	if (distanceToEnemy < 400) {
+				//		toxicSpit = true;
+				//	}
+				//}
+//#endif
 
 				// do stuff for this event.
 				AttackSound(toxicSpit);
