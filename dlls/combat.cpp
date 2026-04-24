@@ -1993,8 +1993,32 @@ void CBaseEntity::BloodEffect(const DamageInfo &damageInfo, const Vector &vecOri
 {
 	if (!damageInfo.noBlood)
 	{
+		//logman
+		//UTIL_BloodStream(vecOrigin, gpGlobals->v_forward * -35 + gpGlobals->v_up * 2.1, BloodColor(), (int)100);
 		SpawnBlood( vecOrigin, BloodColor(), damageInfo.damage );// a little surface blood.
 		TraceBleed( damageInfo.damage, vecDir, ptr, damageInfo.type );
+
+		Vector	vecSplatDir;
+		TraceResult	tr;
+		pev->nextthink = gpGlobals->time + 0.1f;
+
+		
+
+		UTIL_MakeVectors(pev->angles);
+
+		if (BloodColor() != BLOOD_COLOR_RED)
+		{
+		
+		if (RANDOM_FLOAT(0.0f, 1.0f) < 0.7f)// larger chance of globs
+		{
+			UTIL_BloodDrips(vecOrigin, UTIL_RandomBloodVector(), BloodColor(), 10);
+		}
+		else // slim chance of geyser
+		{
+			UTIL_BloodStream(vecOrigin, UTIL_RandomBloodVector(), BloodColor(), RANDOM_LONG(50, 150));
+		}
+
+		}
 	}
 }
 
@@ -2046,6 +2070,7 @@ void CBaseMonster::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker,
 		m_LastHitGroup = ptr->iHitgroup;
 
 		ApplyHitGroupDamageMultiplier(damageInfo, ptr->iHitgroup);
+	
 
 		BloodEffect(damageInfo, vecDir, ptr);
 		AddMultiDamage( pevInflictor, pevAttacker, this, damageInfo );
