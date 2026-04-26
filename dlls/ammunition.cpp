@@ -144,6 +144,10 @@ bool CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 
 	if ( pOther->GiveAmmo( amount, ammoName ) > 0 )
 	{
+
+		CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+
+		pPlayer->PlayPickupSuitForClassname(STRING(pev->classname));//banana
 		EmitSoundScript(Items::ammoPickupSoundScript);
 		return true;
 	}

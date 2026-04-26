@@ -649,6 +649,8 @@ public:
 		{
 			pPlayer->TakeArmor(this, pev->health > 0 ? pev->health : DefaultCapacity());
 
+			pPlayer->SetSuitUpdate("!HEV_BATTERY", FALSE, SUIT_NEXT_IN_30SEC); //-pcklog2
+
 			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 
 			NotifyPickup(pPlayer, pev->classname);

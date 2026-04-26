@@ -350,6 +350,8 @@ public:
 	void NVGTurnOff( bool playOffSound = true );
 
 	void UpdatePlayerSound ();
+	void PlayPickupSuitSentence(const char* pszSentence);
+	void PlayPickupSuitForClassname(const char* pszClassName);
 	void DeathSound() override;
 
 	int DefaultClassify() override;
@@ -596,6 +598,7 @@ public:
 	edict_t* m_UseToolTriggers[32];
 
 	bool m_bunnyhop;
+	void PlayAmmoPickupSentence(const char* ammoClassname);
 };
 
 extern int gmsgHudText;

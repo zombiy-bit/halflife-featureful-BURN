@@ -491,6 +491,38 @@ int TrainSpeed( int iSpeed, int iMax )
 	return iRet;
 }
 
+// вызывает HEV-фразу только после успешного подбора
+void CBasePlayer::PlayPickupSuitSentence(const char* pszSentence)
+{
+
+	if (!pszSentence || !pszSentence[0])
+		return;
+	// если у тебя в форке уже есть suit queue / SetSuitUpdate,
+	// лучше использовать именно её
+	SetSuitUpdate((char*)pszSentence, FALSE, 0);
+}
+//shrek
+void CBasePlayer::PlayPickupSuitForClassname(const char* pszClassName)
+{
+
+	if (!pszClassName || !pszClassName[0])
+		return;
+	if (FStrEq(pszClassName, "ammo_9mmclip"))
+		PlayPickupSuitSentence("!HEV_9MM");
+	else if (FStrEq(pszClassName, "ammo_357"))
+		PlayPickupSuitSentence("!HEV_44AMMO");
+	else if (FStrEq(pszClassName, "ammo_buckshot"))
+		PlayPickupSuitSentence("!HEV_BUCKSHOT");
+	else if (FStrEq(pszClassName, "ammo_crossbow"))
+		PlayPickupSuitSentence("!HEV_BOLTS");
+	else if (FStrEq(pszClassName, "ammo_rpgclip"))
+		PlayPickupSuitSentence("!HEV_RPGAMMO");
+	else if (FStrEq(pszClassName, "ammo_9mmAR"))
+		PlayPickupSuitSentence("!HEV_AGRENADE");
+	else if (FStrEq(pszClassName, "ammo_gaussclip"))
+		PlayPickupSuitSentence("!HEV_EGONPOWER");
+}
+
 void CBasePlayer::DeathSound()
 {
 	const SoundScript* deathSoundScript = GetSoundScript(Player::deathSoundScript);
@@ -539,6 +571,8 @@ void CBasePlayer::DeathSound()
 			EMIT_GROUPNAME_SUIT( ENT( pev ), "HEV_DEAD" );
 	}
 }
+
+
 
 // override takehealth
 // bitsDamageType indicates type of damage healed. 
@@ -5156,6 +5190,7 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 	int i = ammoType->id;
 
 	int iAdd = Q_min( iCount, ammoType->maxAmmo - m_rgAmmo[i] );
+
 	if( iAdd < 1 )
 		return i;
 

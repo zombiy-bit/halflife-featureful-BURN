@@ -865,6 +865,47 @@ bool CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 	pev->globalname = iStringNull;
 	m_iClientMaxClip = 0;
 
+	const char* cls = STRING(pev->classname);
+
+	if (FStrEq(cls, "weapon_9mmhandgun"))
+		pPlayer->SetSuitUpdate("!HEV_PISTOL", FALSE, 0);//  -pcklog3
+
+	else if (FStrEq(cls, "weapon_shotgun"))
+		pPlayer->SetSuitUpdate("!HEV_SHOTGUN", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_9mmAR"))
+		pPlayer->SetSuitUpdate("!HEV_ASSAULT", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_357"))
+		pPlayer->SetSuitUpdate("!HEV_44PISTOL", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_rpg"))
+		pPlayer->SetSuitUpdate("!HEV_RPG", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_crossbow"))
+		pPlayer->SetSuitUpdate("!HEV_XBOW", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_gauss"))
+		pPlayer->SetSuitUpdate("!HEV_GAUSS", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_egon"))
+		pPlayer->SetSuitUpdate("!HEV_EGON", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_handgrenade"))
+		pPlayer->SetSuitUpdate("!HEV_GRENADE", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_tripmine"))
+		pPlayer->SetSuitUpdate("!HEV_TRIPMINE", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_satchel"))
+		pPlayer->SetSuitUpdate("!HEV_SATCHEL", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_snark"))
+		pPlayer->SetSuitUpdate("!HEV_SQUEEK", FALSE, 0);
+
+	else if (FStrEq(cls, "weapon_hornetgun"))
+		pPlayer->SetSuitUpdate("!HEV_HORNET", FALSE, 0);
+
 	return AddWeapon();
 }
 
@@ -957,6 +998,8 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body )
 		WRITE_BYTE( pev->body );	// weaponmodel bodygroup.
 	MESSAGE_END();
 }
+
+
 
 bool CBasePlayerWeapon::AddPrimaryAmmo( int iCount )
 {

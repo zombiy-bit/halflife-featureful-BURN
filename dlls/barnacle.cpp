@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -22,8 +22,12 @@
 #include	"monsters.h"
 #include	"schedule.h"
 
-#define	BARNACLE_BODY_HEIGHT	44 // how 'tall' the barnacle's model is.
-#define BARNACLE_PULL_SPEED		8
+#define BARNACLE_BODY_HEIGHT 44
+#define BARNACLE_PULL_SPEED 8
+
+#define BARNACLE_IDLE_TONGUE_LENGTH 0.0f
+#define BARNACLE_EXTEND_SPEED       100.0f
+#define BARNACLE_RETRACT_SPEED     40.0f    // how fast it hides
 #define BARNACLE_KILL_VICTIM_DELAY	5 // how many seconds after pulling prey in to gib them. 
 
 //=========================================================
@@ -37,22 +41,22 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	void UpdateOnRemove() override;
-	bool MustAddToFullPack(unsigned char *pSet) override;
+	bool MustAddToFullPack(unsigned char* pSet) override;
 	void ReleaseVictim();
-	CBaseEntity *TongueTouchEnt( float *pflLength );
+	CBaseEntity* TongueTouchEnt(float* pflLength);
 	int DefaultClassify() override;
-	Vector DefaultMinHullSize() override { return Vector( -16.0f, -16.0f, -32.0f ); }
-	Vector DefaultMaxHullSize() override { return Vector( 16.0f, 16.0f, 0.0f ); }
-	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	Vector DefaultMinHullSize() override { return Vector(-16.0f, -16.0f, -32.0f); }
+	Vector DefaultMaxHullSize() override { return Vector(16.0f, 16.0f, 0.0f); }
+	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	void EXPORT BarnacleThink();
 	void EXPORT WaitTillDead();
-	KilledResult Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib ) override;
-	DamageInfo DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo) override;
+	KilledResult Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	DamageInfo DefaultTransformDamageInfo(entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& inputDamageInfo) override;
 	void PainSound() override;
-	int Save( CSave &save ) override;
-	int Restore( CRestore &restore ) override;
+	int Save(CSave& save) override;
+	int Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
-
+	bool IsBarnaclePrey(CBaseEntity* pEnt);
 	int DefaultSizeForGrapple() override { return GRAPPLE_FIXED; }
 
 	float m_flAltitude;
@@ -71,20 +75,20 @@ public:
 	static const NamedSoundScript painSoundScript;
 };
 
-LINK_ENTITY_TO_CLASS( monster_barnacle, CBarnacle )
+LINK_ENTITY_TO_CLASS(monster_barnacle, CBarnacle)
 
 TYPEDESCRIPTION	CBarnacle::m_SaveData[] =
 {
-	DEFINE_FIELD( CBarnacle, m_flAltitude, FIELD_FLOAT ),
-	DEFINE_FIELD( CBarnacle, m_flKillVictimTime, FIELD_TIME ),
-	DEFINE_FIELD( CBarnacle, m_cGibs, FIELD_INTEGER ),// barnacle loads up on gibs each time it kills something.
-	DEFINE_FIELD( CBarnacle, m_fTongueExtended, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBarnacle, m_fLiftingPrey, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBarnacle, m_flTongueAdj, FIELD_FLOAT ),
-	DEFINE_FIELD( CBarnacle, m_flCachedLength, FIELD_FLOAT ),
+	DEFINE_FIELD(CBarnacle, m_flAltitude, FIELD_FLOAT),
+	DEFINE_FIELD(CBarnacle, m_flKillVictimTime, FIELD_TIME),
+	DEFINE_FIELD(CBarnacle, m_cGibs, FIELD_INTEGER),// barnacle loads up on gibs each time it kills something.
+	DEFINE_FIELD(CBarnacle, m_fTongueExtended, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBarnacle, m_fLiftingPrey, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBarnacle, m_flTongueAdj, FIELD_FLOAT),
+	DEFINE_FIELD(CBarnacle, m_flCachedLength, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE( CBarnacle, CBaseMonster )
+IMPLEMENT_SAVERESTORE(CBarnacle, CBaseMonster)
 
 const NamedSoundScript CBarnacle::biteSoundScript = {
 	CHAN_WEAPON,
@@ -131,9 +135,9 @@ int CBarnacle::DefaultClassify()
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
-void CBarnacle::HandleAnimEvent( MonsterEvent_t *pEvent )
+void CBarnacle::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
-	switch( pEvent->event )
+	switch (pEvent->event)
 	{
 	case BARNACLE_AE_PUKEGIB:
 	{
@@ -152,9 +156,9 @@ void CBarnacle::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 		}
 	}
-		break;
+	break;
 	default:
-		CBaseMonster::HandleAnimEvent( pEvent );
+		CBaseMonster::HandleAnimEvent(pEvent);
 		break;
 	}
 }
@@ -166,35 +170,39 @@ void CBarnacle::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/barnacle.mdl" );
+	SetMyModel("models/barnacle.mdl");
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;
 	pev->takedamage = DAMAGE_AIM;
-	SetMyBloodColor( BLOOD_COLOR_RED );
+	SetMyBloodColor(BLOOD_COLOR_RED);
 	pev->effects = EF_INVLIGHT; // take light from the ceiling
-	SetMyHealth( GetSkillValue("barnacle_health") );
+	SetMyHealth(GetSkillValue("barnacle_health"));
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flKillVictimTime = 0.0f;
 	m_flCachedLength = 32.0f;	// mins.z
 	m_cGibs = 0;
 	m_fLiftingPrey = false;
+	m_fTongueExtended = false;
 	m_flTongueAdj = -100.0f;
+
+	// tongue is hidden at spawn
+	m_flAltitude = BARNACLE_IDLE_TONGUE_LENGTH;
 
 	InitBoneControllers();
 
-	SetActivity( ACT_IDLE );
+	SetActivity(ACT_IDLE);
 
-	SetThink( &CBarnacle::BarnacleThink );
+	SetThink(&CBarnacle::BarnacleThink);
 	pev->nextthink = gpGlobals->time + 0.5f;
 
 	pev->max_health = pev->health;
-	UTIL_SetOrigin( pev, pev->origin );
+	UTIL_SetOrigin(pev, pev->origin);
 }
 
-DamageInfo CBarnacle::DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo)
+DamageInfo CBarnacle::DefaultTransformDamageInfo(entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& inputDamageInfo)
 {
 	DamageInfo damageInfo = inputDamageInfo;
 	if (damageInfo.type & DMG_CLUB)
@@ -209,20 +217,42 @@ void CBarnacle::PainSound()
 	EmitSoundScript(painSoundScript);
 }
 
+bool CBarnacle::IsBarnaclePrey(CBaseEntity* pEnt)
+{
+	if (!pEnt || !pEnt->pev)
+		return false;
+
+	if (pEnt == this)
+		return false;
+
+	if (pEnt->pev->deadflag != DEAD_NO)
+		return false;
+
+	const char* name = STRING(pEnt->pev->classname);
+	if (!name)
+		return false;
+
+	return FStrEq(name, "monster_zombie") ||
+		FStrEq(name, "monster_zombie_barney") ||
+		FStrEq(name, "monster_zombie_soldier") ||
+		FStrEq(name, "monster_alien_slave") ||
+		FStrEq(name, "monster_vortigaunt");
+}
+
 //=========================================================
 //=========================================================
 void CBarnacle::BarnacleThink()
 {
-	CBaseEntity *pTouchEnt;
-	CBaseMonster *pVictim;
+	CBaseEntity* pTouchEnt;
+	CBaseMonster* pVictim;
 	float flLength;
 	pev->nextthink = gpGlobals->time + 0.1f;
 	GlowShellUpdate();
 
-	if( m_hEnemy != 0 )
+	if (m_hEnemy != 0)
 	{
 		// barnacle has prey.
-		if( !m_hEnemy->IsAlive() )
+		if (!m_hEnemy->IsAlive())
 		{
 			// someone (maybe even the barnacle) killed the prey. Reset barnacle.
 			m_fLiftingPrey = false;// indicate that we're not lifting prey.
@@ -237,9 +267,9 @@ void CBarnacle::BarnacleThink()
 			return;
 		}
 
-		if( m_fLiftingPrey )
+		if (m_fLiftingPrey)
 		{
-			if( m_hEnemy != 0 && m_hEnemy->pev->deadflag != DEAD_NO )
+			if (m_hEnemy != 0 && m_hEnemy->pev->deadflag != DEAD_NO)
 			{
 				// crap, someone killed the prey on the way up.
 				m_hEnemy = NULL;
@@ -253,13 +283,13 @@ void CBarnacle::BarnacleThink()
 			vecNewEnemyOrigin.y = pev->origin.y;
 
 			// guess as to where their neck is
-			vecNewEnemyOrigin.x -= 6.0f * cos( m_hEnemy->pev->angles.y * M_PI_F / 180.0f );	
-			vecNewEnemyOrigin.y -= 6.0f * sin( m_hEnemy->pev->angles.y * M_PI_F / 180.0f );
+			vecNewEnemyOrigin.x -= 6.0f * cos(m_hEnemy->pev->angles.y * M_PI_F / 180.0f);
+			vecNewEnemyOrigin.y -= 6.0f * sin(m_hEnemy->pev->angles.y * M_PI_F / 180.0f);
 
 			m_flAltitude -= BARNACLE_PULL_SPEED;
 			vecNewEnemyOrigin.z += BARNACLE_PULL_SPEED;
 
-			if( fabs( pev->origin.z - ( vecNewEnemyOrigin.z + m_hEnemy->pev->view_ofs.z - 8 ) ) < BARNACLE_BODY_HEIGHT )
+			if (fabs(pev->origin.z - (vecNewEnemyOrigin.z + m_hEnemy->pev->view_ofs.z - 8)) < BARNACLE_BODY_HEIGHT)
 			{
 				// prey has just been lifted into position ( if the victim origin + eye height + 8 is higher than the bottom of the barnacle, it is assumed that the head is within barnacle's body )
 				m_fLiftingPrey = false;
@@ -270,26 +300,26 @@ void CBarnacle::BarnacleThink()
 
 				m_flKillVictimTime = gpGlobals->time + 10.0f;// now that the victim is in place, the killing bite will be administered in 10 seconds.
 
-				if( pVictim )
+				if (pVictim)
 				{
-					pVictim->BarnacleVictimBitten( pev );
-					SetActivity( ACT_EAT );
+					pVictim->BarnacleVictimBitten(pev);
+					SetActivity(ACT_EAT);
 				}
 			}
 
-			UTIL_SetOrigin( m_hEnemy->pev, vecNewEnemyOrigin );
+			UTIL_SetOrigin(m_hEnemy->pev, vecNewEnemyOrigin);
 		}
 		else
 		{
 			// prey is lifted fully into feeding position and is dangling there.
 			pVictim = m_hEnemy->MyMonsterPointer();
 
-			if( m_flKillVictimTime != -1.0f && gpGlobals->time > m_flKillVictimTime )
+			if (m_flKillVictimTime != -1.0f && gpGlobals->time > m_flKillVictimTime)
 			{
 				// kill!
-				if( pVictim )
+				if (pVictim)
 				{
-					pVictim->TakeDamage( pev, pev, DamageInfo(pVictim->pev->health, DMG_SLASH).SetGibPolicy(GIB_ALWAYS) );
+					pVictim->TakeDamage(pev, pev, DamageInfo(pVictim->pev->health, DMG_SLASH).SetGibPolicy(GIB_ALWAYS));
 					m_cGibs = 3;
 				}
 
@@ -297,10 +327,10 @@ void CBarnacle::BarnacleThink()
 			}
 
 			// bite prey every once in a while
-			if( pVictim && ( RANDOM_LONG( 0, 49 ) == 0 ) )
+			if (pVictim && (RANDOM_LONG(0, 49) == 0))
 			{
 				EmitSoundScript(chewSoundScript);
-				pVictim->BarnacleVictimBitten( pev );
+				pVictim->BarnacleVictimBitten(pev);
 			}
 		}
 	}
@@ -308,17 +338,17 @@ void CBarnacle::BarnacleThink()
 	{
 		// barnacle has no prey right now, so just idle and check to see if anything is touching the tongue.
 		// If idle and no nearby client, don't think so often
-		if( FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
-			pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 1.0f, 1.5f );	// Stagger a bit to keep barnacles from thinking on the same frame
+		if (FNullEnt(FIND_CLIENT_IN_PVS(edict())))
+			pev->nextthink = gpGlobals->time + RANDOM_FLOAT(1.0f, 1.5f);	// Stagger a bit to keep barnacles from thinking on the same frame
 
-		if( m_fSequenceFinished )
+		if (m_fSequenceFinished)
 		{
 			// this is done so barnacle will fidget.
-			SetActivity ( ACT_IDLE );
+			SetActivity(ACT_IDLE);
 			m_flTongueAdj = -100;
 		}
 
-		if( m_cGibs && RANDOM_LONG( 0, 99 ) == 1 )
+		if (m_cGibs && RANDOM_LONG(0, 99) == 1)
 		{
 			// cough up a gib.
 			CGib::SpawnHumanGibs(pev, 1);
@@ -327,16 +357,30 @@ void CBarnacle::BarnacleThink()
 			EmitSoundScript(chewSoundScript);
 		}
 
-		pTouchEnt = TongueTouchEnt( &flLength );
+		pTouchEnt = TongueTouchEnt(&flLength);
 
-		if( pTouchEnt != NULL && m_fTongueExtended )
+		if (pTouchEnt != NULL)
 		{
-			// tongue is fully extended, and is touching someone.
-			if( pTouchEnt->FBecomeProne() )
+			// tongue moves down smoothly but very fast
+			if (m_flAltitude < flLength)
+			{
+				m_flAltitude += BARNACLE_EXTEND_SPEED;
+				if (m_flAltitude > flLength)
+					m_flAltitude = flLength;
+			}
+			else
+			{
+				m_flAltitude = flLength;
+			}
+
+			m_fTongueExtended = (m_flAltitude >= flLength);
+
+			// try to grab only when tongue has almost reached the target
+			if (m_flAltitude >= flLength - 2.0f && pTouchEnt->FBecomeProne())
 			{
 				EmitSoundScript(alertSoundScript);
 
-				SetSequenceByName( "attack1" );
+				SetSequenceByName("attack1");
 				m_flTongueAdj = -20.0f;
 
 				m_hEnemy = pTouchEnt;
@@ -347,32 +391,33 @@ void CBarnacle::BarnacleThink()
 				pTouchEnt->pev->origin.x = pev->origin.x;
 				pTouchEnt->pev->origin.y = pev->origin.y;
 
-				m_fLiftingPrey = true;// indicate that we should be lifting prey.
-				m_flKillVictimTime = -1;// set this to a bogus time while the victim is lifted.
+				m_fLiftingPrey = true;
+				m_flKillVictimTime = -1;
 
 				m_flAltitude = pev->origin.z - pTouchEnt->EyePosition().z;
 			}
 		}
 		else
 		{
-			// calculate a new length for the tongue to be clear of anything else that moves under it. 
-			if( m_flAltitude < flLength )
+			// hide tongue when nobody is under it
+			if (m_flAltitude > BARNACLE_IDLE_TONGUE_LENGTH)
 			{
-				// if tongue is higher than is should be, lower it kind of slowly.
-				m_flAltitude += BARNACLE_PULL_SPEED;
-				m_fTongueExtended = false;
+				m_flAltitude -= BARNACLE_RETRACT_SPEED;
+				if (m_flAltitude < BARNACLE_IDLE_TONGUE_LENGTH)
+					m_flAltitude = BARNACLE_IDLE_TONGUE_LENGTH;
 			}
 			else
 			{
-				m_flAltitude = flLength;
-				m_fTongueExtended = true;
+				m_flAltitude = BARNACLE_IDLE_TONGUE_LENGTH;
 			}
+
+			m_fTongueExtended = false;
 		}
 	}
 
 	// ALERT( at_console, "tounge %f\n", m_flAltitude + m_flTongueAdj );
-	SetBoneController( 0, -( m_flAltitude + m_flTongueAdj ) );
-	StudioFrameAdvance( 0.1f );
+	SetBoneController(0, -(m_flAltitude + m_flTongueAdj));
+	StudioFrameAdvance(0.1f);
 
 	if (pTip)
 		UTIL_SetOrigin(pTip->pev, pev->origin - Vector(0, 0, m_flAltitude));
@@ -381,7 +426,7 @@ void CBarnacle::BarnacleThink()
 //=========================================================
 // Killed.
 //=========================================================
-KilledResult CBarnacle::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
+KilledResult CBarnacle::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
 {
 	if (!HasMemory(bits_MEMORY_KILLED))
 		OnDying(false);
@@ -393,13 +438,13 @@ KilledResult CBarnacle::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 	EmitSoundScript(dieSoundScript);
 
-	SetActivity( ACT_DIESIMPLE );
-	SetBoneController( 0, 0 );
+	SetActivity(ACT_DIESIMPLE);
+	SetBoneController(0, 0);
 
-	StudioFrameAdvance( 0.1f );
+	StudioFrameAdvance(0.1f);
 
 	pev->nextthink = gpGlobals->time + 0.1f;
-	SetThink( &CBarnacle::WaitTillDead );
+	SetThink(&CBarnacle::WaitTillDead);
 	return KilledResult();
 }
 
@@ -410,14 +455,14 @@ void CBarnacle::WaitTillDead()
 	pev->nextthink = gpGlobals->time + 0.1f;
 	GlowShellUpdate();
 
-	float flInterval = StudioFrameAdvance( 0.1f );
-	DispatchAnimEvents( flInterval );
+	float flInterval = StudioFrameAdvance(0.1f);
+	DispatchAnimEvents(flInterval);
 
-	if( m_fSequenceFinished )
+	if (m_fSequenceFinished)
 	{
 		// death anim finished. 
 		StopAnimation();
-		SetThink( NULL );
+		SetThink(NULL);
 
 		if (ShouldFadeOnDeath())
 			SUB_StartFadeOut();
@@ -429,7 +474,7 @@ void CBarnacle::WaitTillDead()
 //=========================================================
 void CBarnacle::Precache()
 {
-	PrecacheMyModel( "models/barnacle.mdl" );
+	PrecacheMyModel("models/barnacle.mdl");
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);//happy, lifting food up
@@ -459,7 +504,7 @@ void CBarnacle::UpdateOnRemove()
 	CBaseMonster::UpdateOnRemove();
 }
 
-bool CBarnacle::MustAddToFullPack(unsigned char *pSet)
+bool CBarnacle::MustAddToFullPack(unsigned char* pSet)
 {
 	if (pTip)
 		return ENGINE_CHECK_VISIBILITY(pTip->edict(), pSet) != 0;
@@ -471,7 +516,7 @@ void CBarnacle::ReleaseVictim()
 	if (m_hEnemy != 0)
 	{
 		CBaseMonster* pVictim = m_hEnemy->MyMonsterPointer();
-		if( pVictim )
+		if (pVictim)
 			pVictim->BarnacleVictimReleased();
 	}
 }
@@ -482,33 +527,32 @@ void CBarnacle::ReleaseVictim()
 // of the trace in the int pointer provided.
 //=========================================================
 #define BARNACLE_CHECK_SPACING	8.0f
-CBaseEntity *CBarnacle::TongueTouchEnt( float *pflLength )
+CBaseEntity* CBarnacle::TongueTouchEnt(float* pflLength)
 {
 	TraceResult tr;
 	float length;
 
-	// trace once to hit architecture and see if the tongue needs to change position.
-	UTIL_TraceLine( pev->origin, pev->origin - Vector ( 0.0f, 0.0f, 2048.0f ), ignore_monsters, ENT( pev ), &tr );
-	length = fabs( pev->origin.z - tr.vecEndPos.z );
-	if( pflLength )
-	{
-		*pflLength = length;
-	}
+	UTIL_TraceLine(pev->origin, pev->origin - Vector(0.0f, 0.0f, 2048.0f), ignore_monsters, ENT(pev), &tr);
+	length = fabs(pev->origin.z - tr.vecEndPos.z);
 
-	Vector delta = Vector( BARNACLE_CHECK_SPACING, BARNACLE_CHECK_SPACING, 0.0f );
+	if (pflLength)
+		*pflLength = length;
+
+	Vector delta = Vector(BARNACLE_CHECK_SPACING, BARNACLE_CHECK_SPACING, 0.0f);
 	Vector mins = pev->origin - delta;
 	Vector maxs = pev->origin + delta;
 	maxs.z = pev->origin.z;
 	mins.z -= length;
 
-	CBaseEntity *pList[10];
-	int count = UTIL_EntitiesInBox( pList, 10, mins, maxs, ( FL_CLIENT | FL_MONSTER ) );
-	if( count )
+	CBaseEntity* pList[10];
+	int count = UTIL_EntitiesInBox(pList, 10, mins, maxs, (FL_CLIENT | FL_MONSTER));
+
+	if (count)
 	{
-		for( int i = 0; i < count; i++ )
+		for (int i = 0; i < count; i++)
 		{
-			// only clients and monsters
-			if( pList[i] != this && IRelationship( pList[i] ) > R_NO && pList[ i ]->pev->deadflag == DEAD_NO )	// this ent is one of our enemies. Barnacle tries to eat it.
+			if (pList[i] != this &&
+				(IRelationship(pList[i]) > R_NO || IsBarnaclePrey(pList[i])))
 			{
 				return pList[i];
 			}

@@ -68,6 +68,7 @@ bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
 	if( pPlayer->TakeHealth( this, pev->health > 0 ? pev->health : DefaultCapacity(), HEAL_CHARGE ) )
 	{
 		if (healed) {
+			pPlayer->SetSuitUpdate("!HEV_MEDKIT", FALSE, SUIT_NEXT_IN_30SEC);//-pcklog1
 			NotifyPickup(pPlayer, pev->classname);
 			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		}
