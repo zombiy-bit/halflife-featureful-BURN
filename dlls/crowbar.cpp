@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -33,19 +33,23 @@ enum crowbar_e
 	CROWBAR_ATTACK3HIT,
 	CROWBAR_IDLE2,
 	CROWBAR_IDLE3,
+	CROWBAR_FIRST_PICKUP = 13
 };
 
 class CCrowbar : public CConfigurableWeapon
 {
 public:
 	int WeaponId() const override { return WEAPON_CROWBAR; }
-	bool GetItemInfo(ItemInfo *p) override;
+	bool GetItemInfo(ItemInfo* p) override;
 	WeaponParameters GetDefaultParameters() const override;
+
+	int GetFirstPickupDeployAnim() override { return 13; }
+	float GetFirstPickupDeployIdleDelay() override { return 2.55f; }
 };
 
-LINK_WEAPON_TO_CLASS( weapon_crowbar, CCrowbar )
+LINK_WEAPON_TO_CLASS(weapon_crowbar, CCrowbar)
 
-bool CCrowbar::GetItemInfo( ItemInfo *p )
+bool CCrowbar::GetItemInfo(ItemInfo* p)
 {
 	p->iSlot = 0;
 	p->iPosition = 0;
@@ -75,8 +79,8 @@ WeaponParameters CCrowbar::GetDefaultParameters() const
 	params.fire.fireType = WeaponParameters::Fire::MELEE;
 	params.fire.damageInfo.main.damage = ::GetSkillValueRange("plr_crowbar");
 	params.fire.subsequentSwingFactor = 0.5f;
-	params.fire.anims = {CROWBAR_ATTACK1MISS, CROWBAR_ATTACK2MISS, CROWBAR_ATTACK3MISS};
-	params.fire.hitAnims = {CROWBAR_ATTACK2HIT, CROWBAR_ATTACK3HIT};
+	params.fire.anims = { CROWBAR_ATTACK1MISS, CROWBAR_ATTACK2MISS, CROWBAR_ATTACK3MISS };
+	params.fire.hitAnims = { CROWBAR_ATTACK2HIT, CROWBAR_ATTACK3HIT };
 	params.fire.sound = {
 		CHAN_WEAPON,
 		{"weapons/cbar_miss1.wav"},

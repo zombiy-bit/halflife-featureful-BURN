@@ -5119,6 +5119,25 @@ int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem )
 		return GOT_DUP_ITEM;
 	}
 
+	if (pItem->AddToPlayer(this)) //goga4
+	{
+		g_pGameRules->PlayerGotWeapon(this, pItem);
+		pItem->CheckRespawn();
+		InsertWeaponById(pItem);
+
+		const bool bFirstPickup = !HasFirstPickupPlayed(pItem->WeaponId());
+		MarkFirstPickupPlayed(pItem->WeaponId());
+		pItem->m_bPlayFirstPickupDeploy = bFirstPickup;
+
+		if (g_pGameRules->FShouldSwitchWeapon(this, pItem))
+		{
+			SwitchWeapon(pItem);
+		}
+
+		pItem->AttachToPlayer(this);
+		return GOT_NEW_ITEM;
+	} // goga4
+
 	if( pItem->AddToPlayer( this ) )
 	{
 		g_pGameRules->PlayerGotWeapon( this, pItem );

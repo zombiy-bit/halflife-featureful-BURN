@@ -222,8 +222,27 @@ public:
 
 	std::uint64_t m_WeaponBits;
 
+	std::uint64_t m_WeaponFirstPickupBits = 0;
+
 	//Not saved, used to update client.
 	std::uint64_t m_ClientWeaponBits;
+
+	bool HasFirstPickupPlayed(int id) const // goga1
+	{
+		return (m_WeaponFirstPickupBits & (1ULL << id)) != 0;
+	}
+
+	bool MarkFirstPickupPlayed(int id)
+	{
+		const bool first = !HasFirstPickupPlayed(id);
+		m_WeaponFirstPickupBits |= (1ULL << id);
+		return first;
+	}
+
+	void ResetFirstPickupBits()
+	{
+		m_WeaponFirstPickupBits = 0;
+	}
 
 	// shared ammo slots
 	int	m_rgAmmo[MAX_AMMO_TYPES];
