@@ -42,6 +42,9 @@ public:
 	int WeaponId() const override { return WEAPON_GLOCK; }
 	bool GetItemInfo(ItemInfo *p) override;
 	WeaponParameters GetDefaultParameters() const override;
+
+	int GetFirstPickupDeployAnim() override { return 10; }
+	float GetFirstPickupDeployIdleDelay() override { return 3.8f; }
 };
 
 LINK_ENTITY_TO_CLASS( weapon_glock, CGlock )

@@ -264,7 +264,7 @@ void MaterialRegistry::FillDefaults()
 		MaterialData data;
 		data.hit.volume = 0.9f;
 		data.hit.volumebar = 0.2f;
-		data.hit.SetWaves({"debris/wood1.wav", "debris/wood2.wav", "debris/wood3.wav"});
+		data.hit.SetWaves({"debris/wood1.wav", "debris/wood2.wav", "debris/wood3.wav", "debris/wood4.wav" });
 		data.hit.allowWeaponSparks = false;
 		data.hit.wallpuffColor = Color3(75, 42, 15);
 		SetMaterialData(CHAR_TEX_WOOD, data);
@@ -274,7 +274,7 @@ void MaterialRegistry::FillDefaults()
 		MaterialData data;
 		data.hit.volume = 0.8f;
 		data.hit.volumebar = 0.2f;
-		data.hit.SetWaves({"debris/glass1.wav", "debris/glass2.wav", "debris/glass3.wav"});
+		data.hit.SetWaves({"debris/glass1.wav", "debris/glass2.wav", "debris/glass3.wav", "debris/glass4.wav" });
 		SetMaterialData(CHAR_TEX_GLASS, data);
 		data.hit.playSparks = true;
 		SetMaterialData(CHAR_TEX_COMPUTER, data);

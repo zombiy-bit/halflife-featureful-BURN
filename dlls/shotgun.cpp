@@ -44,6 +44,9 @@ public:
 	int WeaponId() const override { return WEAPON_SHOTGUN; }
 	bool GetItemInfo(ItemInfo *p) override;
 	WeaponParameters GetDefaultParameters() const override;
+
+	int GetFirstPickupDeployAnim() override { return 10; }  
+	float GetFirstPickupDeployIdleDelay() override { return 2.63f; } 
 };
 
 LINK_WEAPON_TO_CLASS( weapon_shotgun, CShotgun )

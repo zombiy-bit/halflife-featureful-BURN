@@ -271,7 +271,7 @@ void CBreakable::Activate()
 
 const NamedSoundScript CBreakable::woodSoundScript = {
 	CHAN_VOICE,
-	{"debris/wood1.wav", "debris/wood2.wav", "debris/wood3.wav"},
+	{"debris/wood1.wav", "debris/wood2.wav", "debris/wood3.wav", "debris/wood4.wav"},
 	"Breakable.Wood"
 };
 
@@ -286,7 +286,7 @@ const NamedSoundScript CBreakable::fleshSoundScript = {
 
 const NamedSoundScript CBreakable::metalSoundScript = {
 	CHAN_VOICE,
-	{"debris/metal1.wav", "debris/metal3.wav"},
+	{"debris/metal1.wav", "debris/metal3.wav", "debris/metal2.wav", "debris/metal4.wav", "debris/metal5.wav", "debris/metal6.wav"},
 	"Breakable.Metal"
 };
 
@@ -298,7 +298,7 @@ const NamedSoundScript CBreakable::concreteSoundScript = {
 
 const NamedSoundScript CBreakable::glassSoundScript = {
 	CHAN_VOICE,
-	{"debris/glass1.wav", "debris/glass2.wav", "debris/glass3.wav"},
+	{"debris/glass1.wav", "debris/glass2.wav", "debris/glass3.wav", "debris/glass4.wav"},
 	"Breakable.Glass"
 };
 
@@ -310,7 +310,7 @@ const NamedSoundScript CBreakable::computerSoundScript = {
 
 const NamedSoundScript CBreakable::bustWoodSoundScript = {
 	CHAN_VOICE,
-	{"debris/bustcrate1.wav", "debris/bustcrate2.wav"},
+	{"debris/bustcrate1.wav", "debris/bustcrate2.wav", "debris/bustcrate3.wav"},
 	"Breakable.BustWood"
 };
 
@@ -334,7 +334,7 @@ const NamedSoundScript CBreakable::bustGlassSoundScript = {
 
 const NamedSoundScript CBreakable::bustMetalSoundScript = {
 	CHAN_VOICE,
-	{"debris/bustmetal1.wav", "debris/bustmetal2.wav"},
+	{"debris/bustmetal1.wav", "debris/bustmetal2.wav", "debris/bustmetal3.wav"},
 	"Breakable.BustMetal"
 };
 

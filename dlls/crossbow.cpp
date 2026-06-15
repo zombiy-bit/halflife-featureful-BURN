@@ -65,7 +65,7 @@ const NamedSoundScript CCrossbowBolt::boltHitBody = {
 
 const NamedSoundScript CCrossbowBolt::boltHitWorld = {
 	CHAN_BODY,
-	{"weapons/xbow_hit1.wav"},
+	{"weapons/xbow_hit1.wav", "weapons/xbow_hit2.wav"},
 	FloatRange(0.95f, 1.0f),
 	ATTN_NORM,
 	IntRange(98, 105),

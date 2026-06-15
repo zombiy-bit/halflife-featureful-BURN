@@ -26,19 +26,21 @@ set (CMAKE_CXX_STANDARD 11)
 cmake_minimum_required(VERSION 3.9)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.15.0")
-	cmake_policy(SET CMP0091 NEW)
+    cmake_policy(SET CMP0091 NEW)
 endif()
 
-# Install custom module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(CheckIncludeFile)
 include(CheckFunctionExists)
 include(CheckCSourceCompiles)
-include(VSForceXPToolchain) # Force XP toolchain for Visual Studio
+
+# XP toolchain helper is optional for modern VS.
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/VSForceXPToolchain.cmake" OPTIONAL)
+
 include(CheckIPOSupported)
 
-project (HLSDK-FEATUREFUL)
+project(HLSDK-FEATUREFUL)
 
 #--------------
 # USER DEFINES \
@@ -163,7 +165,24 @@ endif()
 
 # Xash3D FWGS Library Naming Scheme compliance
 # see documentation: https://github.com/FWGS/xash3d-fwgs/blob/master/Documentation/extensions/library-naming.md
-include(LibraryNaming)
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/LibraryNaming.cmake" OPTIONAL)
+
+if(NOT COMMAND set_target_postfix)
+    macro(set_target_postfix target)
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME "${target}")
+        if(NOT ANDROID)
+            set_target_properties(${target} PROPERTIES PREFIX "")
+        endif()
+    endmacro()
+
+    macro(set_target_postfix_with_name target name)
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME "${name}")
+        if(NOT ANDROID)
+            set_target_properties(${target} PROPERTIES PREFIX "")
+        endif()
+    endmacro()
+endif()   
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(STATUS "Building for 64 Bit")

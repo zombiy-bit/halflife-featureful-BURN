@@ -82,6 +82,9 @@ set (SVDLL_SOURCES
 	egon.cpp
 	ent_templates.cpp
 	explode.cpp
+	env_model_shadow.cpp
+	env_randomxenmaker.cpp
+	env_soundscape.cpp
 	fgrunt.cpp
 	flybee.cpp
 	flyingmonster.cpp
@@ -179,6 +182,7 @@ set (SVDLL_SOURCES
 	sniperrifle.cpp
 	sound.cpp
 	soundent.cpp
+	env_soundscape.cpp
 	spectator.cpp
 	spore.cpp
 	sporelauncher.cpp
