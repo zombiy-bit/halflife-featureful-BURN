@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -42,7 +42,7 @@ public:
 	void Precache() override;
 	int Classify() override;
 	void EXPORT BubbleThink();
-	void EXPORT BoltTouch( CBaseEntity *pOther );
+	void EXPORT BoltTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeThink();
 	void SetProjectileParamsBeforeSpawn(const ProjectileParameters& params) {
 		SetProjectileParamsBeforeSpawnImpl(params);
@@ -55,7 +55,7 @@ public:
 	static const NamedSoundScript boltHitWorld;
 };
 
-LINK_ENTITY_TO_CLASS( crossbow_bolt, CCrossbowBolt )
+LINK_ENTITY_TO_CLASS(crossbow_bolt, CCrossbowBolt)
 
 const NamedSoundScript CCrossbowBolt::boltHitBody = {
 	CHAN_BODY,
@@ -102,11 +102,11 @@ void CCrossbowBolt::Spawn()
 
 	SetMyModel("models/crossbow_bolt.mdl");
 
-	UTIL_SetOrigin( pev, pev->origin );
-	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	UTIL_SetOrigin(pev, pev->origin);
+	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
-	SetTouch( &CCrossbowBolt::BoltTouch );
-	SetThink( &CCrossbowBolt::BubbleThink );
+	SetTouch(&CCrossbowBolt::BoltTouch);
+	SetThink(&CCrossbowBolt::BubbleThink);
 	pev->nextthink = gpGlobals->time + 0.2f;
 }
 
@@ -122,24 +122,24 @@ int CCrossbowBolt::Classify()
 	return CLASS_NONE;
 }
 
-void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
+void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 {
-	SetTouch( NULL );
-	SetThink( NULL );
+	SetTouch(NULL);
+	SetThink(NULL);
 
 	const bool explosiveBolt = FBitSet(pev->spawnflags, SF_CROSSBOW_BOLT_EXPLOSIVE);
 
-	if( pOther->pev->takedamage )
+	if (pOther->pev->takedamage)
 	{
 		TraceResult tr = UTIL_GetGlobalTrace();
-		entvars_t *pevOwner = VARS( pev->owner );
+		entvars_t* pevOwner = VARS(pev->owner);
 
 		float damage = GetProjectileDamage();
 		int dmgType = DMG_GENERIC;
 
 		if (damage == 0)
 		{
-			if( pOther->IsPlayer() )
+			if (pOther->IsPlayer())
 			{
 				damage = GetSkillValue("plr_xbow_bolt_client");
 			}
@@ -156,35 +156,35 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 
 		DamageInfo damageInfo(damage, dmgType);
 		damageInfo.SetGibPolicy(GIB_NEVER);
-		pOther->ApplyTraceAttack( pev, pevOwner, damageInfo, pev->velocity.Normalize(), &tr );
+		pOther->ApplyTraceAttack(pev, pevOwner, damageInfo, pev->velocity.Normalize(), &tr);
 
-		pev->velocity = Vector( 0, 0, 0 );
+		pev->velocity = Vector(0, 0, 0);
 		// play body "thwack" sound
 		EmitSoundScript(boltHitBody);
 
 		if (!explosiveBolt)
 		{
-			Killed( pev, pev, GIB_NEVER );
+			Killed(pev, pev, GIB_NEVER);
 		}
 	}
 	else
 	{
 		EmitSoundScript(boltHitWorld);
 
-		SetThink( &CBaseEntity::SUB_Remove );
+		SetThink(&CBaseEntity::SUB_Remove);
 		pev->nextthink = gpGlobals->time;// this will get changed below if the bolt is allowed to stick in what it hit.
 
-		if( FClassnameIs( pOther->pev, "worldspawn" ) )
+		if (FClassnameIs(pOther->pev, "worldspawn"))
 		{
 			// if what we hit is static architecture, can stay around for a while.
 			Vector vecDir = pev->velocity.Normalize();
-			UTIL_SetOrigin( pev, pev->origin - vecDir * 12.0f );
-			pev->angles = UTIL_VecToAngles( vecDir );
+			UTIL_SetOrigin(pev, pev->origin - vecDir * 12.0f);
+			pev->angles = UTIL_VecToAngles(vecDir);
 			pev->solid = SOLID_NOT;
 			pev->movetype = MOVETYPE_FLY;
-			pev->velocity = Vector( 0, 0, 0 );
+			pev->velocity = Vector(0, 0, 0);
 			pev->avelocity.z = 0;
-			pev->angles.z = RANDOM_LONG( 0, 360 );
+			pev->angles.z = RANDOM_LONG(0, 360);
 			pev->nextthink = gpGlobals->time + 10.0f;
 		}
 		// TODO: make configurable?
@@ -197,16 +197,16 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 			pev->velocity = Vector( 0, 0, 0 );
 			pev->avelocity.z = 0;
 			pev->angles.z = RANDOM_LONG( 0, 360 );
-			pev->nextthink = gpGlobals->time + 10.0f;			
+			pev->nextthink = gpGlobals->time + 10.0f;
 
 			// g-cont. Setup movewith feature
 			pev->movetype = MOVETYPE_COMPOUND;	// set movewith type
 			pev->aiment = ENT( pOther->pev );	// set parent
 		}*/
 
-		if( UTIL_PointContents( pev->origin ) != CONTENTS_WATER )
+		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)
 		{
-			UTIL_Sparks( pev->origin );
+			UTIL_Sparks(pev->origin);
 		}
 
 		ClearBits(pev->effects, EF_LIGHT);
@@ -214,7 +214,7 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 
 	if (explosiveBolt)
 	{
-		SetThink( &CCrossbowBolt::ExplodeThink );
+		SetThink(&CCrossbowBolt::ExplodeThink);
 		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
@@ -223,48 +223,48 @@ void CCrossbowBolt::BubbleThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	if( pev->waterlevel == WL_NotInWater )
+	if (pev->waterlevel == WL_NotInWater)
 		return;
 
-	UTIL_BubbleTrail( pev->origin - pev->velocity * 0.1f, pev->origin, 1 );
+	UTIL_BubbleTrail(pev->origin - pev->velocity * 0.1f, pev->origin, 1);
 }
 
 void CCrossbowBolt::ExplodeThink()
 {
-	int iContents = UTIL_PointContents( pev->origin );
+	int iContents = UTIL_PointContents(pev->origin);
 	int iScale;
 
 	pev->dmg = GetSkillValue("plr_xbow_bolt_explo");
 	iScale = 10;
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-		WRITE_BYTE( TE_EXPLOSION );
-		WRITE_VECTOR( pev->origin );
-		if( iContents != CONTENTS_WATER )
-		{
-			WRITE_SHORT( g_sModelIndexFireball );
-		}
-		else
-		{
-			WRITE_SHORT( g_sModelIndexWExplosion );
-		}
-		WRITE_BYTE( iScale ); // scale * 10
-		WRITE_BYTE( 15 ); // framerate
-		WRITE_BYTE( TE_EXPLFLAG_NONE );
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_EXPLOSION);
+	WRITE_VECTOR(pev->origin);
+	if (iContents != CONTENTS_WATER)
+	{
+		WRITE_SHORT(g_sModelIndexFireball);
+	}
+	else
+	{
+		WRITE_SHORT(g_sModelIndexWExplosion);
+	}
+	WRITE_BYTE(iScale); // scale * 10
+	WRITE_BYTE(15); // framerate
+	WRITE_BYTE(TE_EXPLFLAG_NONE);
 	MESSAGE_END();
 
-	entvars_t *pevOwner;
+	entvars_t* pevOwner;
 
-	if( pev->owner )
-		pevOwner = VARS( pev->owner );
+	if (pev->owner)
+		pevOwner = VARS(pev->owner);
 	else
 		pevOwner = NULL;
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	::RadiusDamage( pev->origin, pev, pevOwner, DamageInfo(pev->dmg, DMG_BLAST).SetGibPolicy(GIB_ALWAYS), 128, CLASS_NONE );
+	::RadiusDamage(pev->origin, pev, pevOwner, DamageInfo(pev->dmg, DMG_BLAST).SetGibPolicy(GIB_ALWAYS), 128, CLASS_NONE);
 
-	UTIL_Remove( this );
+	UTIL_Remove(this);
 }
 #endif
 
@@ -284,33 +284,265 @@ enum crossbow_e
 	CROSSBOW_HOLSTER2	// empty
 };
 
+#ifdef CLIENT_DLL
+bool g_bCrossbowScopeVisible = false;
+#endif
+
+enum crossbow_scope_phase_e
+{
+	CROSSBOW_SCOPE_NONE = 0,
+	CROSSBOW_SCOPE_ZOOMING_IN,
+	CROSSBOW_SCOPE_FADE_TO_SCOPE,
+	CROSSBOW_SCOPE_SCOPED,
+	CROSSBOW_SCOPE_ZOOMING_OUT,
+	CROSSBOW_SCOPE_FADE_TO_DEFAULT
+};
+
 class CCrossbow : public CConfigurableWeapon
 {
 public:
 	void Precache() override;
 	int WeaponId() const override { return WEAPON_CROSSBOW; }
-	bool GetItemInfo(ItemInfo *p) override;
+	bool GetItemInfo(ItemInfo* p) override;
 	WeaponParameters GetDefaultParameters() const override;
 	int GetPlaybackEvent(bool altModeFire) const override;
 
+	bool Deploy() override;
+	void Holster() override;
+	void ItemPostFrame() override;
+
 	void NativeAttack(bool altMode) override;
+
 private:
+	void StartScopeIn();
+	void StartScopeOut();
+	void UpdateScope();
+	void SetPlayerFOV(float flFov);
+	float GetPlayerFOV() const;
+	void PushScreenFade(bool toBlack, float fadeTime, float holdTime);
+
 	unsigned short m_usCrossbow2;
+	int   m_iScopePhase = CROSSBOW_SCOPE_NONE;
+	float m_flScopePhaseStartTime = 0.0f;
+	float m_flScopeStartFOV = 0.0f;
+	float m_flScopeTargetFOV = 25.0f;
+	float m_flScopeRestoreFOV = 0.0f;
+	float m_flScopeAnimTime = 0.22f;
+	float m_flScopeBlackHoldTime = 0.02f;
 };
 
-LINK_WEAPON_TO_CLASS( weapon_crossbow, CCrossbow )
+LINK_WEAPON_TO_CLASS(weapon_crossbow, CCrossbow)
 
 void CCrossbow::Precache()
 {
 	CConfigurableWeapon::Precache();
-	m_usCrossbow2 = PRECACHE_EVENT( 1, "events/crossbow2.sc" );
+	m_usCrossbow2 = PRECACHE_EVENT(1, "events/crossbow2.sc");
 }
 
-bool CCrossbow::GetItemInfo( ItemInfo *p )
+bool CCrossbow::GetItemInfo(ItemInfo* p)
 {
 	p->iSlot = 2;
 	p->iPosition = 2;
 	return true;
+}
+
+
+float CCrossbow::GetPlayerFOV() const
+{
+	float flFov = m_pPlayer->pev->fov;
+
+	if (flFov <= 0.0f)
+	{
+		flFov = 90.0f;
+	}
+
+	return flFov;
+}
+
+void CCrossbow::SetPlayerFOV(float flFov)
+{
+	if (flFov <= 0.0f)
+	{
+		m_pPlayer->pev->fov = 0.0f;
+		m_pPlayer->m_iFOV = 0;
+		return;
+	}
+
+	if (flFov < 1.0f)
+		flFov = 1.0f;
+	else if (flFov > 179.0f)
+		flFov = 179.0f;
+
+	m_pPlayer->pev->fov = flFov;
+	m_pPlayer->m_iFOV = (int)flFov;
+}
+
+void CCrossbow::PushScreenFade(bool toBlack, float fadeTime, float holdTime)
+{
+#if !CLIENT_DLL
+	UTIL_ScreenFade(m_pPlayer, Vector(0, 0, 0), fadeTime, holdTime, 255, toBlack ? (FFADE_OUT | FFADE_STAYOUT) : FFADE_IN);
+#endif
+}
+
+void CCrossbow::StartScopeIn()
+{
+	if (m_iScopePhase == CROSSBOW_SCOPE_SCOPED || m_iScopePhase == CROSSBOW_SCOPE_FADE_TO_SCOPE || m_iScopePhase == CROSSBOW_SCOPE_ZOOMING_IN)
+		return;
+	ALERT(at_console, "SCOPE", STRING(pev->classname));
+	m_flScopeRestoreFOV = GetPlayerFOV();
+	m_flScopeStartFOV = m_flScopeRestoreFOV;
+	m_flScopeTargetFOV = 25.0f;
+
+	m_iScopePhase = CROSSBOW_SCOPE_ZOOMING_IN;
+	m_flScopePhaseStartTime = gpGlobals->time;
+
+	SendWeaponAnim(12); // scope
+}
+
+void CCrossbow::StartScopeOut()
+{
+	if (m_iScopePhase == CROSSBOW_SCOPE_NONE || m_iScopePhase == CROSSBOW_SCOPE_FADE_TO_DEFAULT || m_iScopePhase == CROSSBOW_SCOPE_ZOOMING_OUT)
+		return;
+	ALERT(at_console, "UNSCOPE", STRING(pev->classname));
+	m_flScopeStartFOV = 25.0f;
+	m_flScopeTargetFOV = m_flScopeRestoreFOV > 0.0f ? m_flScopeRestoreFOV : 90.0f;
+
+	PushScreenFade(true, 0.1f, m_flScopeBlackHoldTime);
+
+	m_iScopePhase = CROSSBOW_SCOPE_FADE_TO_DEFAULT;
+	m_flScopePhaseStartTime = gpGlobals->time;
+	
+	SendWeaponAnim(13); // unscope
+}
+
+void CCrossbow::UpdateScope()
+{
+	switch (m_iScopePhase)
+	{
+	case CROSSBOW_SCOPE_ZOOMING_IN: // меньше фов
+	{
+		float t = (gpGlobals->time - m_flScopePhaseStartTime) / m_flScopeAnimTime;
+		t = (t < 0.0f) ? 0.0f : ((t > 0.85f) ? 0.85f : t);
+		SetPlayerFOV(m_flScopeStartFOV + (m_flScopeTargetFOV - m_flScopeStartFOV) * t);
+		ALERT(at_console, "ZOOMING IN", STRING(pev->classname));
+
+		std::string s = std::to_string(GetPlayerFOV());
+		const char* c_str = s.c_str(); // Points to "3.140000"
+
+		ALERT(at_console, c_str, STRING(pev->classname));
+
+		if (t >= 0.85f)
+		{
+			ALERT(at_console, "ZOOMED IN", STRING(pev->classname));
+			m_iScopePhase = CROSSBOW_SCOPE_FADE_TO_SCOPE;
+			m_flScopePhaseStartTime = gpGlobals->time;
+			PushScreenFade(true, 0.1f, m_flScopeBlackHoldTime);
+		}
+		break;
+	}
+
+	case CROSSBOW_SCOPE_ZOOMING_OUT: // больше фов
+	{
+		float t = (gpGlobals->time - m_flScopePhaseStartTime) / m_flScopeAnimTime;
+		t = (t < 0.0f) ? 0.0f : ((t > 1.0f) ? 1.0f : t);
+		SetPlayerFOV(m_flScopeStartFOV + (m_flScopeTargetFOV - m_flScopeStartFOV) * t);
+		ALERT(at_console, "ZOOMING OUT", STRING(pev->classname));
+
+		std::string s = std::to_string(GetPlayerFOV());
+		const char* c_str = s.c_str(); // Points to "3.140000"
+
+		ALERT(at_console, c_str, STRING(pev->classname));
+		if (t >= 1.0f)
+		{
+			ALERT(at_console, "ZOOMED OUT", STRING(pev->classname));
+			SetPlayerFOV(m_flScopeTargetFOV);
+			m_iScopePhase = CROSSBOW_SCOPE_NONE;
+		}
+		break;
+	}
+
+	case CROSSBOW_SCOPE_SCOPED:
+		//SetPlayerFOV(25.0f);
+		break;
+
+	case CROSSBOW_SCOPE_FADE_TO_SCOPE: // сделай фейд на прицел
+		if (gpGlobals->time - m_flScopePhaseStartTime >= m_flScopeBlackHoldTime)
+		{
+			ALERT(at_console, "FADE TO SCOPE", STRING(pev->classname));
+			SetPlayerFOV(25.0f);
+#ifdef CLIENT_DLL
+			g_bCrossbowScopeVisible = true; // включить спрайт прицела
+#endif
+			m_iScopePhase = CROSSBOW_SCOPE_SCOPED;
+			m_flScopePhaseStartTime = gpGlobals->time;
+			PushScreenFade(false, 0.1f, 0.0f); // убрать ф
+		}
+		break;
+
+	case CROSSBOW_SCOPE_FADE_TO_DEFAULT: // сделай фейд из прицела
+		if (gpGlobals->time - m_flScopePhaseStartTime >= m_flScopeBlackHoldTime)
+		{
+			ALERT(at_console, "FADE FROM SCOPE", STRING(pev->classname));
+#ifdef CLIENT_DLL
+			g_bCrossbowScopeVisible = false; // убрать спрайт прицела
+#endif
+			m_flScopeStartFOV = 25.0f;
+			PushScreenFade(false, 0.1f, 0.0f); // убрать ф
+			m_iScopePhase = CROSSBOW_SCOPE_ZOOMING_OUT;
+			m_flScopePhaseStartTime = gpGlobals->time;
+	
+		}
+		break;
+
+	default:
+		break;
+	}
+}
+
+bool CCrossbow::Deploy()
+{
+	m_iScopePhase = CROSSBOW_SCOPE_NONE;
+	m_flScopePhaseStartTime = 0.0f;
+	m_flScopeRestoreFOV = 0.0f;
+	m_flScopeStartFOV = 0.0f;
+	m_flScopeTargetFOV = 25.0f;
+#ifdef CLIENT_DLL
+	g_bCrossbowScopeVisible = false;
+#endif
+	return CConfigurableWeapon::Deploy();
+}
+
+void CCrossbow::Holster()
+{
+	m_iScopePhase = CROSSBOW_SCOPE_NONE;
+	m_flScopePhaseStartTime = 0.0f;
+	m_flScopeRestoreFOV = 0.0f;
+	m_flScopeStartFOV = 0.0f;
+	m_flScopeTargetFOV = 25.0f;
+	SetPlayerFOV(0.0f);
+#ifdef CLIENT_DLL
+	g_bCrossbowScopeVisible = false;
+#endif
+	CConfigurableWeapon::Holster();
+}
+
+void CCrossbow::ItemPostFrame()
+{
+	const bool attack2Pressed = (m_pPlayer->m_afButtonPressed & IN_ATTACK2) != 0;
+	const bool attack2Released = (m_pPlayer->m_afButtonReleased & IN_ATTACK2) != 0;
+
+	if (attack2Pressed)
+	{
+		StartScopeIn();
+	}
+	else if (attack2Released)
+	{
+		StartScopeOut();
+	}
+
+	UpdateScope();
+
+	CConfigurableWeapon::ItemPostFrame();
 }
 
 WeaponParameters CCrossbow::GetDefaultParameters() const
@@ -330,19 +562,19 @@ WeaponParameters CCrossbow::GetDefaultParameters() const
 	params.deploy.animIndex = CROSSBOW_DRAW1;
 	params.deploy.animIndex.mainEmptied = CROSSBOW_DRAW2;
 
-	params.idleAnims.main =  WeaponParameters::IdleAnimArray{
+	params.idleAnims.main = WeaponParameters::IdleAnimArray{
 		WeaponParameters::IdleAnim{CROSSBOW_IDLE1, 0.75f, 91.0f / 30.0f },
 		WeaponParameters::IdleAnim{CROSSBOW_FIDGET1, 0.25f, 81.0f / 30.0f},
 	};
 
-	params.idleAnims.mainEmptied =  WeaponParameters::IdleAnimArray{
+	params.idleAnims.mainEmptied = WeaponParameters::IdleAnimArray{
 		WeaponParameters::IdleAnim{CROSSBOW_IDLE2, 0.75f, 91.0f / 30.0f },
 		WeaponParameters::IdleAnim{CROSSBOW_FIDGET2, 0.25f, 81.0f / 30.0f},
 	};
 
 	params.fire.fireType = WeaponParameters::Fire::PROJECTILE;
-	params.fire.anims = {CROSSBOW_FIRE1};
-	params.fire.anims.mainEmptied = {CROSSBOW_FIRE3};
+	params.fire.anims = { CROSSBOW_FIRE1 };
+	params.fire.anims.mainEmptied = { CROSSBOW_FIRE3 };
 	params.fire.sound = {
 		CHAN_WEAPON,
 		{"weapons/xbow_fire1.wav"},
@@ -352,7 +584,7 @@ WeaponParameters CCrossbow::GetDefaultParameters() const
 	};
 	params.fire.soundAdditional = {
 		CHAN_ITEM,
-		{"weapons/xbow_reload1.wav"},
+		{"ambience/_comma.wav"},
 		FloatRange(0.9f, 1.0f),
 		ATTN_NORM,
 		IntRange(93, 108)
@@ -378,15 +610,13 @@ WeaponParameters CCrossbow::GetDefaultParameters() const
 		params.fire.fireType.alt = WeaponParameters::Fire::NATIVE;
 	}
 
-	params.altMode.zoomFOV = 20;
-	params.altMode.attackDelay = 1.0f;
-	params.secondaryFireType = SecondaryFireType::SWITCH_MODE;
+	params.secondaryFireType = SecondaryFireType::DISABLED;
 
 	params.reload.animIndex = CROSSBOW_RELOAD;
 	params.reload.duration = 4.5f;
 	params.reload.sound = {
 		CHAN_ITEM,
-		{"weapons/xbow_reload1.wav"},
+		{"ambience/_comma.wav"},
 		FloatRange(0.95f, 1.0f),
 		ATTN_NORM,
 		IntRange(93, 108)
@@ -412,16 +642,16 @@ void CCrossbow::NativeAttack(bool altMode)
 	TraceResult tr;
 
 	Vector anglesAim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
-	UTIL_MakeVectors( anglesAim );
+	UTIL_MakeVectors(anglesAim);
 	Vector vecSrc = m_pPlayer->GetGunPosition() - gpGlobals->v_up * 2.0f;
 	Vector vecDir = gpGlobals->v_forward;
 
-	UTIL_TraceLine( vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr );
+	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
 
 #if !CLIENT_DLL
-	if( tr.pHit->v.takedamage )
+	if (tr.pHit->v.takedamage)
 	{
-		CBaseEntity::Instance( tr.pHit )->ApplyTraceAttack( m_pPlayer->pev, m_pPlayer->pev, DamageInfo(GetSkillValue("plr_xbow_bolt_hitscan"), DMG_BULLET).SetGibPolicy(GIB_NEVER), vecDir, &tr );
+		CBaseEntity::Instance(tr.pHit)->ApplyTraceAttack(m_pPlayer->pev, m_pPlayer->pev, DamageInfo(GetSkillValue("plr_xbow_bolt_hitscan"), DMG_BULLET).SetGibPolicy(GIB_NEVER), vecDir, &tr);
 	}
 #endif
 }

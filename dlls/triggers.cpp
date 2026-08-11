@@ -1770,6 +1770,50 @@ USE_TYPE CTriggerMultiple::UseType()
 		return USE_TOGGLE;
 }
 
+class CTriggerSpeedMultiple : public CTriggerMultiple
+{
+public:
+	void Spawn() override;
+	void KeyValue( KeyValueData *pkvd ) override;
+	void EXPORT SpeedTouch( CBaseEntity *pOther );
+};
+
+LINK_ENTITY_TO_CLASS( trigger_speed_multiple, CTriggerSpeedMultiple )
+
+void CTriggerSpeedMultiple::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "speed" ) )
+	{
+		pev->speed = atof( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else
+		CTriggerMultiple::KeyValue( pkvd );
+}
+
+void CTriggerSpeedMultiple::Spawn()
+{
+	if( m_flWait == 0 )
+		m_flWait = 0.2f;
+
+	InitTrigger();
+
+	ASSERTSZ( pev->health == 0, "trigger_speed_multiple with health" );
+	SetTouch( &CTriggerSpeedMultiple::SpeedTouch );
+}
+
+void CTriggerSpeedMultiple::SpeedTouch( CBaseEntity *pOther )
+{
+	if( pev->speed > 0.0f && pOther && pOther->pev )
+	{
+		const float flSpeed = pOther->pev->velocity.Length2D();
+		if( flSpeed < pev->speed )
+			return;
+	}
+
+	CBaseTrigger::MultiTouch( pOther );
+}
+
 class CTriggerOnce : public CTriggerMultiple
 {
 public:

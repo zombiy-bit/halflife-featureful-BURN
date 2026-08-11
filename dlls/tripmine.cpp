@@ -114,7 +114,7 @@ const NamedSoundScript CTripmineGrenade::chargeSoundScript = {
 
 const NamedVisual CTripmineGrenade::beamVisual = BuildVisual("Tripmine.Beam")
 		.Model(g_pModelNameLaser)
-		.RenderColor(0, 214, 198)
+		.RenderColor(255, 0, 0) //.RenderColor(0, 214, 198)
 		.Alpha(64)
 		.BeamWidth(10)
 		.BeamScrollRate(255);
@@ -153,8 +153,8 @@ void CTripmineGrenade::Spawn()
 	}
 	else
 	{
-		// power up in 2.5 seconds
-		m_flPowerUp = gpGlobals->time + 2.5f;
+		// power up in 2.5 seconds // changed to 1 for better gameplay
+		m_flPowerUp = gpGlobals->time + 1.0f;
 	}
 
 	SetThink( &CTripmineGrenade::PowerupThink );
