@@ -67,6 +67,7 @@ set (SVDLL_SOURCES
 	cbase.cpp
 	classify.cpp
 	client.cpp
+	game_radar_hint.cpp
 	combat.cpp
 	common_soundscripts.cpp
 	controller.cpp

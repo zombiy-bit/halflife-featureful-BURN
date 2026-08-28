@@ -864,6 +864,7 @@ void CHud::Init()
 	m_Train.Init();
 	m_Flash.Init();
 	m_MoveMode.Init();
+	m_Radar.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
@@ -1404,6 +1405,7 @@ void CHud::VidInit()
 	m_Train.VidInit();
 	m_Flash.VidInit();
 	m_MoveMode.VidInit();
+	m_Radar.VidInit();
 	m_Message.VidInit();
 	m_StatusBar.VidInit();
 	m_DeathNotice.VidInit();

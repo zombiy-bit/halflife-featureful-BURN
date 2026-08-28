@@ -65,9 +65,6 @@ void CWorldItem::Spawn()
 	case 42: // ITEM_ANTIDOTE:
 		pEntity = CBaseEntity::Create( "item_antidote", pev->origin, pev->angles );
 		break;
-	case 46: // ITEM_ANTIRAD:
-		pEntity = CBaseEntity::Create("item_antirad", pev->origin, pev->angles);
-		break;
 	case 43: // ITEM_SECURITY:
 		pEntity = CBaseEntity::Create( "item_security", pev->origin, pev->angles );
 		break;
@@ -739,40 +736,6 @@ class CItemAntidote : public CItem
 
 LINK_ENTITY_TO_CLASS( item_antidote, CItemAntidote )
 
-class CItemAntirad : public CItem
-{
-	void Spawn() override
-	{
-		Precache();
-		SetMyModel("models/w_rad.mdl");
-		CItem::Spawn();
-	}
-	void Precache() override
-	{
-		PrecacheMyModel("models/w_rad.mdl");
-		if (!FStringNull(pev->noise))
-			PRECACHE_SOUND(STRING(pev->noise));
-	}
-	bool MyTouch(CBasePlayer* pPlayer) override
-	{
-		if (pPlayer->pev->deadflag != DEAD_NO)
-		{
-			return false;
-		}
-		pPlayer->SetSuitUpdate("!HEV_DET5", false, SUIT_NEXT_IN_1MIN);
-
-		pPlayer->m_rgItems[ITEM_ANTIRAD] += 1;
-
-		if (!FStringNull(pev->noise))
-			EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM);
-
-		NotifyPickup(pPlayer, pev->classname);
-
-		return true;
-	}
-};
-
-LINK_ENTITY_TO_CLASS(item_antirad, CItemAntidote)
 
 class CItemSecurity : public CItem
 {

@@ -52,6 +52,10 @@
 #include "ammunition.h"
 #include "monsterinfo.h"
 #include "player_capabilities.h"
+#include "game_radar_hint.h" // cheeki breeki code
+
+#include <iostream> // remove
+#include <string> // remove
 
 // #define DUCKFIX
 
@@ -409,6 +413,7 @@ void LinkUserMessages()
 
 	gmsgMessageBox = REG_USER_MSG("MessageBox", -1);
 	gmsgMirror = REG_USER_MSG("Mirror", 10);
+	Radar_RegisterUserMessages();
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )
@@ -499,7 +504,7 @@ void CBasePlayer::PlayPickupSuitSentence(const char* pszSentence)
 		return;
 	// если у тебя в форке уже есть suit queue / SetSuitUpdate,
 	// лучше использовать именно её
-	SetSuitUpdate((char*)pszSentence, FALSE, 0);
+	SetSuitUpdate((char*)pszSentence, FALSE, SUIT_NEXT_IN_30SEC);
 }
 //shrek
 void CBasePlayer::PlayPickupSuitForClassname(const char* pszClassName)
@@ -518,6 +523,8 @@ void CBasePlayer::PlayPickupSuitForClassname(const char* pszClassName)
 	else if (FStrEq(pszClassName, "ammo_rpgclip"))
 		PlayPickupSuitSentence("!HEV_RPGAMMO");
 	else if (FStrEq(pszClassName, "ammo_9mmAR"))
+		PlayPickupSuitSentence("!HEV_9MM");
+	else if (FStrEq(pszClassName, "ammo_ARgrenades"))
 		PlayPickupSuitSentence("!HEV_AGRENADE");
 	else if (FStrEq(pszClassName, "ammo_gaussclip"))
 		PlayPickupSuitSentence("!HEV_EGONPOWER");
@@ -1055,6 +1062,27 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 			}
 		}
 	}
+	// strange cheeki breeki
+	CBaseEntity* pAttackerEntity = nullptr;
+	CBaseMonster* pRadarMonster = nullptr;
+
+	if (pevAttacker)
+		pAttackerEntity = CBaseEntity::Instance(pevAttacker);
+
+	if (pAttackerEntity && !pAttackerEntity->IsPlayer())
+		pRadarMonster = pAttackerEntity->MyMonsterPointer();
+
+	if (!pRadarMonster && pevInflictor)
+	{
+		CBaseEntity* pInflictorEntity = CBaseEntity::Instance(pevInflictor);
+
+		if (pInflictorEntity && !pInflictorEntity->IsPlayer())
+			pRadarMonster = pInflictorEntity->MyMonsterPointer();
+	}
+
+	if (pRadarMonster && damageInfo.damage > 0.0f)
+		Radar_PlayerDamagedByMonster(this, pRadarMonster);
+
 
 	return takeDamageResult;
 }
@@ -1591,16 +1619,28 @@ void CBasePlayer::WaterMove()
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
 
+
+	float f = pev->air_finished - gpGlobals->time;
+
+	std::string str = std::to_string(f);
+	const char* c_str = str.c_str(); // Get the underlying char*
+
+	std::cout << "String: " << c_str << '\n';
+
+	ALERT(at_console, c_str, STRING(pev->classname));
+
+
 	if( pev->waterlevel != WL_Eyes )
 	{
 		// not underwater
 
 		// play 'up for air' sound
+
 		if( pev->air_finished < gpGlobals->time )
 			EmitSoundScript(Player::undrownSoundScript);
 		else if( pev->air_finished < gpGlobals->time + 9 )
 			EmitSoundScript(Player::emergeInhaleSoundScript);
-
+		
 		pev->air_finished = gpGlobals->time + AIRTIME;
 		pev->dmg = 2;
 
@@ -1613,7 +1653,6 @@ void CBasePlayer::WaterMove()
 
 			// NOTE: this actually causes the count to continue restarting
 			// until all drowning damage is healed.
-
 			m_bitsDamageType |= DMG_DROWNRECOVER;
 			m_bitsDamageType &= ~DMG_DROWN;
 			m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
@@ -1622,6 +1661,7 @@ void CBasePlayer::WaterMove()
 	else
 	{	// fully under water
 		// stop restoring damage while underwater
+
 		m_bitsDamageType &= ~DMG_DROWNRECOVER;
 		m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
 
@@ -1658,21 +1698,33 @@ void CBasePlayer::WaterMove()
 	}
 
 	// make bubbles
+	// bug - bubbles for some reason appears when game on a pause, this causes entities overflow error
+	// feature needed - new type of oxygen refill, oxygen refill station (to prevent softlocks), same oxygen tanks as in https://github.com/arosla-dev/march1998 with wetsuit sound
 	if( pev->waterlevel == WL_Eyes )
 	{
 		air = (int)( pev->air_finished - gpGlobals->time );
 		if( !RANDOM_LONG( 0, 0x1f ) && RANDOM_LONG( 0, AIRTIME - 1 ) >= air )
 		{
+			//if (gpGlobals->time >= bubblescooldown)
+			//{
+				Vector vecHeadOrigin = pev->origin + pev->view_ofs;
+				short int bubblescount = std::round(RANDOM_FLOAT(3.0f, 5.0f));
+
+				if(air <= 0)
+					bubblescount = std::abs(air)*3;
+				//bubblescooldown = gpGlobals->time + 1;
+				UTIL_Bubbles(vecHeadOrigin - Vector(16, 16, 4), vecHeadOrigin + Vector(16, 16, 4),bubblescount); //не только звук но и сами пузырьки
+			//}
 			EmitSoundScript(Player::underwaterExhaleSoundScript);
 		}
 	}
 
-	if( pev->watertype == CONTENT_LAVA )		// do damage
+	if( pev->watertype == CONTENT_LAVA )		// do damage // useless hardcode?
 	{
 		if( pev->dmgtime < gpGlobals->time )
 			TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(10 * pev->waterlevel, DMG_BURN) );
 	}
-	else if( pev->watertype == CONTENT_SLIME )		// do damage
+	else if( pev->watertype == CONTENT_SLIME )		// do damage // useless hardcode?
 	{
 		pev->dmgtime = gpGlobals->time + 1;
 		TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(4 * pev->waterlevel, DMG_ACID) );
@@ -3383,16 +3435,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 						SetSuitUpdate( "!HEV_HEAL4", false, SUIT_REPEAT_OK );
 					}
 				}
-				else if ((i == itbd_Radiation)) {
-					
-					if (m_rgItems[ITEM_ANTIRAD])
-					{
-						m_rgbTimeBasedDamage[i] = 0;
-						m_rgItems[ITEM_ANTIRAD]--;
-						SetSuitUpdate("!HEV_HEAL5", false, SUIT_REPEAT_OK);
-					}
-
-				}
 
 				// decrement damage duration, detect when done.
 				if( !m_rgbTimeBasedDamage[i] || --m_rgbTimeBasedDamage[i] == 0 )
@@ -4931,6 +4973,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		gEvilImpulse101 = true;
 		GiveNamedItem( "item_suit", SF_ITEM_NOFALL|SF_SUIT_NOLOGON );
 		SetDefaultLight();
+		GiveNamedItem("item_healthkit", SF_ITEM_NOFALL);
 		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
 
 		bool ammoTypesToAdd[MAX_AMMO_TYPES] = {false};

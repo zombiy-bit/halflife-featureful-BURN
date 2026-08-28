@@ -46,6 +46,7 @@
 #include "unicode.h"
 #include "mod_features.h"
 #include "error_collector.h"
+#include "game_radar_hint.h" // third cheeki breeki
 
 extern DLL_GLOBAL bool		g_fGameOver;
 extern DLL_GLOBAL unsigned int		g_ulFrameCount;
@@ -211,6 +212,10 @@ void ClientPutInServer( edict_t *pEntity )
 
 	pPlayer->pev->iuser1 = 0;
 	pPlayer->pev->iuser2 = 0;
+
+	if (pPlayer)
+		Radar_MarkPlayerForSilentSync(pPlayer);  // another cheeki breeki #4
+
 }
 
 #if !NO_VOICEGAMEMGR
@@ -1041,6 +1046,8 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		// No suitable client to send the deprecations to, so just clear them
 		g_errorCollector.ClearDeprecations();
 	}
+
+	Radar_MarkAllPlayersForSilentSync(); // cheeki breeki #5
 }
 
 /*
@@ -1102,6 +1109,8 @@ void StartFrame()
 
 	if( g_fGameOver )
 		return;
+
+	Radar_StartFrame();
 
 	gpGlobals->teamplay = teamplay.value;
 	g_ulFrameCount++;

@@ -2006,7 +2006,7 @@ void CBaseEntity::BloodEffect(const DamageInfo &damageInfo, const Vector &vecOri
 
 		UTIL_MakeVectors(pev->angles);
 
-		if (BloodColor() != BLOOD_COLOR_RED)
+		if (1!=2) //(BloodColor() != BLOOD_COLOR_RED) // i maybe change it later
 		{
 		
 		if (RANDOM_FLOAT(0.0f, 1.0f) < 0.7f)// larger chance of globs

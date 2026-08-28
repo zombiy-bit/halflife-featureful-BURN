@@ -33,12 +33,16 @@
 
 Task_t tlHCRangeAttack1[] =
 {
+	//{ TASK_STOP_MOVING, (float)0 },
+	//{ TASK_FACE_IDEAL, (float)0 },
+	//{ TASK_RANGE_ATTACK1, (float)0 },
+	//{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	//{ TASK_FACE_IDEAL, (float)0 },
+	//{ TASK_WAIT_RANDOM, (float)0.5 },
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_FACE_IDEAL, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
-	{ TASK_FACE_IDEAL, (float)0 },
-	{ TASK_WAIT_RANDOM, (float)0.5 },
 };
 
 Schedule_t slHCRangeAttack1[] =
@@ -234,14 +238,14 @@ void CHeadCrab::SetYawSpeed()
 		break;
 	case ACT_RUN:
 	case ACT_WALK:
-		ys = 20;
+		ys = 170;
 		break;
 	case ACT_TURN_LEFT:
 	case ACT_TURN_RIGHT:
-		ys = 60;
+		ys = 250; // obama
 		break;
 	case ACT_RANGE_ATTACK1:
-		ys = 30;
+		ys = 250;
 		break;
 	default:
 		ys = 30;

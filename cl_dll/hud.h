@@ -57,6 +57,7 @@
 #include "journal_config.h"
 
 #include <array>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -810,6 +811,71 @@ public:
 //
 //-----------------------------------------------------
 //
+class CHudRadar : public CHudBase
+{
+public:
+	int Init() override;
+	int VidInit() override;
+	int Draw(float flTime) override;
+	void Reset() override;
+
+	int MsgFunc_RadarData(const char* pszName, int iSize, void* pbuf);
+
+private:
+	struct NpcState
+	{
+		int kind = 0;
+		Vector lastKnown{};
+		float lastRefresh = 0.0f;
+		bool active = false;
+		int snapshotSeen = 0;
+	};
+
+	struct HintState
+	{
+		int kind = 2;
+		Vector origin{};
+		bool active = false;
+		int snapshotSeen = 0;
+	};
+
+	void ResetMarkers();
+	void PlayRadarSound(int kind);
+	void HandleSnapshotBegin(int generation, int flags);
+	void HandleNpcInfo(int entindex, int kind);
+	void HandleNpcDamageReveal(int entindex, int kind, const Vector& origin);
+	void HandleNpcRemove(int entindex);
+	void HandleHintSync(int entindex, int kind, const Vector& origin);
+	void HandleHintEvent(int entindex, int kind, bool enabled, const Vector& origin, bool playSound);
+	void HandleSnapshotEnd(int generation);
+	bool IsNpcVisible(cl_entity_t* localPlayer, cl_entity_t* npc) const;
+	bool IsPointInView(const Vector& eyePosition, const Vector& targetPosition, float fovDegrees) const;
+	bool HasLineOfSight(const Vector& eyePosition, const Vector& targetPosition) const;
+	void UpdateNpcVisibility(cl_entity_t* localPlayer, float flTime);
+	void SeedVisibleNpcsSilently(cl_entity_t* localPlayer, float flTime);
+	void RemoveStaleMarkers(float flTime);
+	void DrawPlayerMarker(int x, int y, int size) const;
+	void DrawDiamond(int x, int y, int r, int g, int b, int alpha, int size) const;
+	void DrawFrame(int x, int y, int size, int thickness, int r, int g, int b, int alpha) const;
+	void WorldToRadar(const Vector& worldPosition, const Vector& playerPosition, float yaw, bool rotateRadar, float range, int radarX, int radarY, int radarSize, int& outX, int& outY) const;
+
+	cvar_t* m_pCvarEnabled = nullptr;
+	cvar_t* m_pCvarRotate = nullptr;
+	cvar_t* m_pCvarRange = nullptr;
+	cvar_t* m_pCvarSize = nullptr;
+	cvar_t* m_pCvarOutline = nullptr;
+
+	std::map<int, NpcState> m_npcs;
+	std::map<int, HintState> m_hints;
+	bool m_snapshotOpen = false;
+	bool m_snapshotSilent = false;
+	bool m_suppressVisibilitySounds = false;
+	bool m_initialSyncPending = true;
+	int m_snapshotGeneration = 0;
+	int m_currentNpcSnapshot = 0;
+	int m_currentHintSnapshot = 0;
+};
+
 class CHudMoveMode: public CHudBase
 {
 	enum
@@ -1234,6 +1300,7 @@ public:
 	CHudTrain		m_Train;
 	CHudFlashlight	m_Flash;
 	CHudMoveMode	m_MoveMode;
+	CHudRadar	m_Radar;
 	CHudMessage		m_Message;
 	CHudStatusBar   m_StatusBar;
 	CHudDeathNotice m_DeathNotice;

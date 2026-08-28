@@ -40,7 +40,7 @@
 #include "objecthint_spec.h"
 #include "warpball.h"
 #include "error_collector.h"
-
+#include "game_radar_hint.h" // another cheeki breeki i v damke
 extern CSoundEnt *pSoundEnt;
 
 extern CBaseEntity				*g_pLastSpawn;
@@ -528,6 +528,7 @@ void CWorld::Spawn()
 void CWorld::Precache()
 {
 	static bool worldInitAtLeastOnce = false;
+	Radar_PrecacheSounds();
 
 	g_pLastSpawn = NULL;
 #if 1
